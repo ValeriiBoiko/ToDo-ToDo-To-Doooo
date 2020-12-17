@@ -4,13 +4,15 @@ import todoReducer from './reducers';
 import { createStore } from 'redux';
 
 const persistConfig = {
-    key: 'root',
-    storage: AsyncStorage,
+  key: 'root',
+  storage: AsyncStorage,
 };
 
 const persistedReducer = persistReducer(persistConfig, todoReducer);
 
 export default () => {
-    const store = createStore(persistedReducer);
-    const persistor = persistStore(store);
+  const store = createStore(persistedReducer);
+  const persistor = persistStore(store);
+
+  return { store, persistor };
 }
