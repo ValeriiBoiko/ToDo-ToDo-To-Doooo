@@ -1,50 +1,51 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { connect } from 'react-redux';
-import { ListItem, RootState } from '../types';
+import { Font, Theme as colors } from '../constants';
+import { ColorTheme, ListItem, RootState } from '../types';
 import { wp } from '../utils';
+import Item from '../components/Item';
+import { updateItemAction } from '../actions';
 
 interface Props {
   list: ListItem[],
+  [props: string]: any
 };
 
 function TodoList({ list, ...props }: Props) {
-  return (
-    <View>
-      {
-        list.map((item) => {
-          return (
-            <View key={item.id} style={styles.item}>
-              <View style={[
-                styles.checkbox,
-                {
-                  backgroundColor: item.isDone ? 'green' : 'red',
-                }
-              ]} />
+  const styles = useMemo(() => getStyles(colors), [colors]);
 
-              <Text style={styles.title}>{item.title}</Text>
-            </View>
-          )
-        })
-      }
-    </View>
+  return (
+    <SafeAreaView style={styles.screen}>
+      <View style={styles.container}>
+        {
+          list.map((item) => (
+            <Item
+              {...item}
+              key={item.id}
+              style={styles.item}
+              onPress={() => props.updateItem({
+                ...item,
+                isDone: !item.isDone,
+              })}
+            />
+          ))
+        }
+      </View>
+    </SafeAreaView>
   )
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: ColorTheme) => StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  container: {
+    paddingHorizontal: wp(20),
+  },
   item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  checkbox: {
-    width: wp(40),
-    height: wp(40),
-    borderRadius: wp(40),
-    marginRight: wp(10),
-  },
-  title: {
-    fontSize: wp(16),
-    padding: 0,
+    marginBottom: wp(10),
   }
 })
 
@@ -52,4 +53,8 @@ const mapStateToProps = (state: RootState) => ({
   list: state.list
 });
 
-export default connect(mapStateToProps)(TodoList);
+const mapStateTopRops = (dispatch: Function) => ({
+  updateItem: (item: ListItem) => dispatch(updateItemAction(item))
+})
+
+export default connect(mapStateToProps, mapStateTopRops)(TodoList);

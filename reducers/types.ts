@@ -2,12 +2,12 @@ import { ListItem } from "../types";
 
 export interface AddItemAction {
   type: string,
-  payload: Omit<ListItem, 'id'>
+  payload: ListItem,
 };
 
 export interface RemoveItemAction {
   type: string,
-  payload: number,
+  payload: ListItem,
 };
 
 export interface UpdateItemAction {
