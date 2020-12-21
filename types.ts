@@ -13,6 +13,7 @@ export interface ColorTheme {
   background: string,
   border: string,
   text: string,
+  card: string,
 }
 
 export interface FontsCollection {

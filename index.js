@@ -1,5 +1,6 @@
 import React from 'react';
-import { AppRegistry } from 'react-native';
+import { AppRegistry, StatusBar } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { name as appName } from './app.json';
@@ -8,10 +9,14 @@ import configureStore from './store';
 
 const { store, persistor } = configureStore();
 
+StatusBar.setHidden(true);
+
 AppRegistry.registerComponent(appName, () => () => (
   <PersistGate persistor={persistor}>
     <Provider store={store}>
-      <TodoList />
+      <SafeAreaProvider>
+        <TodoList />
+      </SafeAreaProvider>
     </Provider>
   </PersistGate>
 ));

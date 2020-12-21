@@ -2,6 +2,7 @@ import { ColorTheme, FontsCollection } from "./types";
 
 export const Action = {
   UPDATE_ITEM: 'UPDATE_ITEM',
+  ADD_ITEM: 'ADD_ITEM',
 };
 
 export const Font: FontsCollection = {
@@ -15,5 +16,6 @@ export const Theme: ColorTheme = {
   primary: '#f5c542',
   background: '#f5f5f5',
   border: '#888',
-  text: '#444'
+  text: '#444',
+  card: '#e9e9e9',
 }

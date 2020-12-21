@@ -1,6 +1,7 @@
+import { ListViewBase } from 'react-native';
 import { Action } from '../constants';
 import { RootState } from '../types';
-import { TodoAction } from './types';
+import { TodoItemAction } from './types';
 
 const initialState = {
   list: [
@@ -12,7 +13,7 @@ const initialState = {
   ],
 };
 
-function todoReducer(state: RootState = initialState, action: TodoAction): RootState {
+function todoReducer(state: RootState = initialState, action: TodoItemAction): RootState {
   switch (action.type) {
     case Action.UPDATE_ITEM:
       return {
@@ -20,6 +21,11 @@ function todoReducer(state: RootState = initialState, action: TodoAction): RootS
         list: state.list.map(item => (
           item.id === action.payload.id ? action.payload : item
         ))
+      }
+    case Action.ADD_ITEM:
+      return {
+        ...state,
+        list: state.list.concat(action.payload),
       }
   }
 
