@@ -1,17 +1,18 @@
-import React, { ForwardedRef, forwardRef, RefObject, useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Keyboard, KeyboardEvent, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { ForwardedRef, forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, Easing, Keyboard, KeyboardEvent, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect } from 'react-redux';
-import { addItem, addItemAction } from '../actions';
-import { Font, Theme as colors } from '../constants';
-import { ColorTheme, ListItem } from '../types';
+import { addItem } from '../actions';
+import { Font } from '../constants';
+import { ColorTheme, RootState } from '../types';
 import { wp } from '../utils';
 
 interface Props {
+  colors: ColorTheme,
   addItem: (title: string) => Function,
 }
 
-function NewItemInput(props: Props, ref: ForwardedRef<TextInput>) {
+function NewItemInput({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) {
   const styles = useMemo(() => getStyles(colors), [colors]);
   const [height, setHeight] = useState(wp(-120));
   const animated = useRef(new Animated.Value(0)).current;
@@ -88,7 +89,7 @@ function NewItemInput(props: Props, ref: ForwardedRef<TextInput>) {
           style={[styles.button, styles.addButton]}
           onPress={() => {
             if (value) {
-              props.addItem(value);
+              addItem(value);
               setValue('');
             }
           }} >
@@ -103,7 +104,6 @@ function NewItemInput(props: Props, ref: ForwardedRef<TextInput>) {
 const getStyles = (colors: ColorTheme) => StyleSheet.create({
   container: {
     position: 'absolute',
-    backgroundColor: colors.background,
     left: 0,
     right: 0,
     paddingHorizontal: wp(20),
@@ -142,10 +142,14 @@ const getStyles = (colors: ColorTheme) => StyleSheet.create({
   }
 });
 
+const maStateToProps = (state: RootState) => ({
+  colors: state.theme,
+})
+
 const mapDispatchToState = (dispatch: Function) => ({
   addItem: (title: string) => dispatch(addItem(title)),
 })
 
 export default connect(
-  null, mapDispatchToState, null, { forwardRef: true }
+  maStateToProps, mapDispatchToState, null, { forwardRef: true }
 )(forwardRef(NewItemInput));

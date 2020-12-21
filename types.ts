@@ -5,6 +5,7 @@ export interface ListItem {
 };
 
 export interface RootState {
+  theme: ColorTheme,
   list: ListItem[],
 }
 
@@ -21,4 +22,9 @@ export interface FontsCollection {
   REGULAR: string,
   MEDIUM: string,
   BOLD: string,
-};
+}
+
+export interface TodoItemAction {
+  type: string,
+  payload: ListItem
+}

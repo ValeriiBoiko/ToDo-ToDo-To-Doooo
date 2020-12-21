@@ -1,8 +1,5 @@
-import { DevSettings } from "react-native";
-import { Middleware } from "redux";
 import { Action } from "./constants";
-import { TodoItemAction } from "./reducers/types";
-import { ListItem, RootState } from "./types";
+import { ListItem, TodoItemAction } from "./types";
 
 
 export function updateItemAction(item: ListItem): TodoItemAction {
@@ -20,7 +17,7 @@ export function addItemAction(item: ListItem): TodoItemAction {
 }
 
 export function addItem(title: string) {
-  return (dispatch: Function, getState: Function) => {
+  return (dispatch: Function, getState: Function): void => {
     const list: ListItem[] = getState().list;
 
     dispatch(

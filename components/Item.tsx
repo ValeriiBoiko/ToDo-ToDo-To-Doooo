@@ -1,15 +1,19 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Font, Theme as colors } from '../constants';
-import { ListItem } from '../types';
+import { Font } from '../constants';
+import { ColorTheme, ListItem, RootState } from '../types';
 import { wp } from '../utils';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { connect } from 'react-redux';
 
 interface Props extends ListItem {
+  colors: ColorTheme,
   [props: string]: any,
 }
 
-function Item({ id, title, isDone, style, ...props }: Props) {
+function Item({ id, title, isDone, style, colors, ...props }: Props) {
+  const styles = useMemo(() => getStyles(colors), [colors]);
+
   return (
     <Pressable {...props} style={[styles.item, style]}>
       <View style={[
@@ -19,11 +23,15 @@ function Item({ id, title, isDone, style, ...props }: Props) {
           borderColor: isDone ? colors.primary : colors.border,
         }
       ]}>
-        <Icon
-          name='done'
-          size={wp(24)}
-          color={'#f5f5f5'}
-          style={{ textAlign: 'center' }} />
+        {
+          isDone && (
+            <Icon
+              name='done'
+              size={wp(24)}
+              color={'#f5f5f5'}
+              style={{ textAlign: 'center' }} />
+          )
+        }
       </View>
 
       <Text style={styles.title}>{title}</Text>
@@ -31,7 +39,7 @@ function Item({ id, title, isDone, style, ...props }: Props) {
   )
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: ColorTheme) => StyleSheet.create({
   item: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -47,9 +55,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: wp(16),
+    color: colors.text,
     padding: 0,
     fontFamily: Font.REGULAR
   }
 })
 
-export default Item;
+const mapStateToProps = (state: RootState) => ({
+  colors: state.theme,
+});
+
+export default connect(mapStateToProps)(Item);

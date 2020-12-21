@@ -1,7 +1,7 @@
 import React, { useMemo, useRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput } from 'react-native';
 import { connect } from 'react-redux';
-import { Font, Theme as colors } from '../constants';
+import { Font } from '../constants';
 import { ColorTheme, ListItem, RootState } from '../types';
 import { wp } from '../utils';
 import Item from '../components/Item';
@@ -12,10 +12,11 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface Props {
   list: ListItem[],
+  colors: ColorTheme,
   [props: string]: any
 };
 
-function TodoList({ list, ...props }: Props) {
+function TodoList({ list, colors, ...props }: Props) {
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => getStyles(colors), [colors]);
   const addItemRef = useRef<TextInput>(null);
@@ -86,7 +87,8 @@ const getStyles = (colors: ColorTheme) => StyleSheet.create({
 })
 
 const mapStateToProps = (state: RootState) => ({
-  list: state.list
+  list: state.list,
+  colors: state.theme
 });
 
 const mapStateTopRops = (dispatch: Function) => ({

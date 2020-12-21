@@ -1,9 +1,8 @@
-import { ListViewBase } from 'react-native';
-import { Action } from '../constants';
-import { RootState } from '../types';
-import { TodoItemAction } from './types';
+import { Action, DarkTheme, LightTheme } from '../constants';
+import { RootState, TodoItemAction } from '../types';
 
 const initialState = {
+  theme: LightTheme,
   list: [
     {
       id: 1,
