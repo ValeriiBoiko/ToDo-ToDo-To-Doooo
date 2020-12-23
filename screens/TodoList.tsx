@@ -7,7 +7,7 @@ import { wp } from '../utils';
 import Item from '../components/Item';
 import { updateItemAction } from '../actions';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import NewItemInput from '../components/NewItemInput';
+import NewItemInput from '../components/NewItem';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface Props {

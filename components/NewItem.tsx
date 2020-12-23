@@ -12,15 +12,19 @@ interface Props {
   addItem: (title: string) => Function,
 }
 
-function NewItemInput({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) {
+const AnimatedIcon = Animated.createAnimatedComponent(Icon);
+
+function NewItem({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) {
   const styles = useMemo(() => getStyles(colors), [colors]);
   const [height, setHeight] = useState(wp(-120));
-  const animated = useRef(new Animated.Value(0)).current;
+  const animatedPosition = useRef(new Animated.Value(0)).current;
+  const animatedOptions = useRef(new Animated.Value(0)).current;
+  const [isOptionsOpen, setOptionsFlag] = useState(false);
   const [value, setValue] = useState('');
 
-  const runAnimation = (targetValue: number) => {
+  const runPositionAnimation = (targetValue: number) => {
     Animated.timing(
-      animated,
+      animatedPosition,
       {
         toValue: targetValue,
         duration: 250,
@@ -30,10 +34,36 @@ function NewItemInput({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) 
     ).start();
   };
 
+  const runOptionsAnimation = (targetValue: number) => {
+    Animated.timing(
+      animatedOptions,
+      {
+        toValue: targetValue,
+        duration: 200,
+        easing: Easing.bezier(.43, 0, .55, 1),
+        useNativeDriver: true,
+      }
+    ).start();
+  };
+
+  const onMorePressed = () => {
+    if (isOptionsOpen) {
+      setOptionsFlag(false);
+      runOptionsAnimation(0);
+    } else {
+      setOptionsFlag(true);
+      runOptionsAnimation(1);
+    }
+  }
+
   useEffect(() => {
     const onKeyboardShow = (e: KeyboardEvent) => setHeight(e.endCoordinates.height);
     const onKeyboardDidShow = (e: KeyboardEvent) => setHeight(e.endCoordinates.height);
-    const onKeyboardHide = () => setHeight(wp(-120));
+    const onKeyboardHide = () => {
+      setHeight(wp(-120));
+      setOptionsFlag(false);
+      runOptionsAnimation(0);
+    };
 
     if (Platform.OS === 'ios') {
       Keyboard.addListener('keyboardWillShow', onKeyboardShow);
@@ -53,15 +83,25 @@ function NewItemInput({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) 
 
   useEffect(() => {
     if (!height) {
-      runAnimation(0)
+      runPositionAnimation(0)
     } else {
-      runAnimation(1)
+      runPositionAnimation(1)
     }
-  }, [height])
+  }, [height]);
 
-  const position = animated.interpolate({
+  const position = animatedPosition.interpolate({
     inputRange: [0, 1],
     outputRange: [wp(-120), height],
+  });
+
+  const optionsPosition = animatedOptions.interpolate({
+    inputRange: [0, 1],
+    outputRange: [wp(170), 0],
+  });
+
+  const moreButtonAngle = animatedOptions.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '180deg'],
   });
 
   return (
@@ -69,13 +109,29 @@ function NewItemInput({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) 
       styles.container,
       { bottom: position, }
     ]}>
-      <View style={{
+      <View style={styles.moreOptions}>
+        <Animated.View style={[
+          styles.optionsContainer,
+          { transform: [{ translateY: optionsPosition }] }
+        ]}>
+          <TextInput
+            multiline={true}
+            placeholder={'Type a note'}
+            style={styles.note}
+          />
+        </Animated.View>
 
-      }}>
         <Pressable
           style={[styles.button, styles.moreButton]}
-          onPress={() => console.log(1)} >
-          <Icon name={'expand-less'} size={wp(30)} color={colors.border} style={styles.icon} />
+          onPress={onMorePressed} >
+          <AnimatedIcon
+            name={'expand-less'}
+            size={wp(30)}
+            color={colors.border}
+            style={[
+              styles.icon,
+              { transform: [{ rotate: moreButtonAngle }] }
+            ]} />
         </Pressable>
       </View>
 
@@ -136,9 +192,31 @@ const getStyles = (colors: ColorTheme) => StyleSheet.create({
     backgroundColor: colors.primary,
   },
   moreButton: {
-    alignSelf: 'flex-end',
     backgroundColor: colors.card,
+    marginLeft: wp(8),
+  },
+  moreOptions: {
     marginBottom: wp(8),
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+    overflow: 'hidden',
+  },
+  note: {
+    flex: 1,
+    padding: 0,
+    marginRight: wp(8),
+    borderRadius: wp(8),
+    fontSize: wp(16),
+    fontFamily: Font.REGULAR,
+    textAlignVertical: 'top',
+    backgroundColor: colors.card,
+  },
+  optionsContainer: {
+    height: wp(170),
+    backgroundColor: colors.card,
+    borderRadius: wp(8),
+    padding: wp(8),
+    flex: 1,
   }
 });
 
@@ -152,4 +230,4 @@ const mapDispatchToState = (dispatch: Function) => ({
 
 export default connect(
   maStateToProps, mapDispatchToState, null, { forwardRef: true }
-)(forwardRef(NewItemInput));
+)(forwardRef(NewItem));
