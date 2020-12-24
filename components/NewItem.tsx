@@ -1,11 +1,12 @@
 import React, { ForwardedRef, forwardRef, useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Keyboard, KeyboardEvent, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Animated, Easing, Keyboard, KeyboardEvent, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect } from 'react-redux';
 import { addItem } from '../actions';
 import { Font } from '../constants';
 import { ColorTheme, RootState } from '../types';
 import { wp } from '../utils';
+import Toggle from './Toggle';
 
 interface Props {
   colors: ColorTheme,
@@ -17,6 +18,7 @@ const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 function NewItem({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) {
   const styles = useMemo(() => getStyles(colors), [colors]);
   const [height, setHeight] = useState(wp(-120));
+  const [daily, setDailyFlag] = useState(false);
   const animatedPosition = useRef(new Animated.Value(0)).current;
   const animatedOptions = useRef(new Animated.Value(0)).current;
   const [isOptionsOpen, setOptionsFlag] = useState(false);
@@ -62,6 +64,7 @@ function NewItem({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) {
     const onKeyboardHide = () => {
       setHeight(wp(-120));
       setOptionsFlag(false);
+      setDailyFlag(false);
       runOptionsAnimation(0);
     };
 
@@ -96,7 +99,7 @@ function NewItem({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) {
 
   const optionsPosition = animatedOptions.interpolate({
     inputRange: [0, 1],
-    outputRange: [wp(170), 0],
+    outputRange: [wp(140), 0],
   });
 
   const moreButtonAngle = animatedOptions.interpolate({
@@ -119,6 +122,16 @@ function NewItem({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) {
             placeholder={'Type a note'}
             style={styles.note}
           />
+          <View style={styles.daily}>
+            <Text style={styles.dailyLabel}>Daily</Text>
+            <Toggle
+              isOn={daily}
+              onToggle={setDailyFlag}
+              trackColor={colors.background}
+              onThumbColor={colors.primary}
+              offThumbColor={colors.border}
+            />
+          </View>
         </Animated.View>
 
         <Pressable
@@ -209,14 +222,25 @@ const getStyles = (colors: ColorTheme) => StyleSheet.create({
     fontSize: wp(16),
     fontFamily: Font.REGULAR,
     textAlignVertical: 'top',
-    backgroundColor: colors.card,
+    backgroundColor: 'transparent',
   },
   optionsContainer: {
-    height: wp(170),
+    height: wp(140),
     backgroundColor: colors.card,
     borderRadius: wp(8),
     padding: wp(8),
     flex: 1,
+  },
+  daily: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+  },
+  dailyLabel: {
+    fontSize: wp(16),
+    fontFamily: Font.REGULAR,
+    color: colors.text,
+    marginRight: wp(8),
   }
 });
 
