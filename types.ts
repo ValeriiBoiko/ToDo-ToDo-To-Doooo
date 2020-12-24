@@ -1,6 +1,8 @@
 export interface ListItem {
   id: number,
   title: string,
+  note?: string,
+  isDaily: boolean,
   isDone: boolean,
 };
 

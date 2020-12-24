@@ -4,13 +4,13 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect } from 'react-redux';
 import { addItem } from '../actions';
 import { Font } from '../constants';
-import { ColorTheme, RootState } from '../types';
+import { ColorTheme, ListItem, RootState } from '../types';
 import { wp } from '../utils';
 import Toggle from './Toggle';
 
 interface Props {
   colors: ColorTheme,
-  addItem: (title: string) => Function,
+  addItem: (item: Omit<ListItem, 'id'>) => Function,
 }
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
@@ -22,7 +22,12 @@ function NewItem({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) {
   const animatedPosition = useRef(new Animated.Value(0)).current;
   const animatedOptions = useRef(new Animated.Value(0)).current;
   const [isOptionsOpen, setOptionsFlag] = useState(false);
-  const [value, setValue] = useState('');
+  const [item, setItem] = useState({
+    title: '',
+    isDaily: false,
+    isDone: false,
+    note: '',
+  });
 
   const runPositionAnimation = (targetValue: number) => {
     Animated.timing(
@@ -64,7 +69,12 @@ function NewItem({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) {
     const onKeyboardHide = () => {
       setHeight(wp(-120));
       setOptionsFlag(false);
-      setDailyFlag(false);
+      setItem({
+        isDone: false,
+        isDaily: false,
+        title: '',
+        note: ''
+      });
       runOptionsAnimation(0);
     };
 
@@ -121,12 +131,24 @@ function NewItem({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) {
             multiline={true}
             placeholder={'Type a note'}
             style={styles.note}
+            value={item.note}
+            onChangeText={(note) => {
+              setItem({
+                ...item,
+                note
+              })
+            }}
           />
           <View style={styles.daily}>
             <Text style={styles.dailyLabel}>Daily</Text>
             <Toggle
-              isOn={daily}
-              onToggle={setDailyFlag}
+              isOn={item.isDaily}
+              onToggle={(isDaily) => {
+                setItem({
+                  ...item,
+                  isDaily
+                })
+              }}
               trackColor={colors.background}
               onThumbColor={colors.primary}
               offThumbColor={colors.border}
@@ -151,15 +173,26 @@ function NewItem({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) {
       <View style={{ flexDirection: 'row' }}>
         <TextInput
           ref={ref}
-          value={value}
-          onChangeText={setValue}
+          placeholder={'Item title'}
+          value={item.title}
+          onChangeText={(title) => {
+            setItem({
+              ...item,
+              title
+            })
+          }}
           style={styles.input} />
         <Pressable
           style={[styles.button, styles.addButton]}
           onPress={() => {
-            if (value) {
-              addItem(value);
-              setValue('');
+            if (item.title.length) {
+              addItem(item);
+              setItem({
+                isDone: false,
+                isDaily: false,
+                title: '',
+                note: ''
+              });
             }
           }} >
           <Icon name={'add'} size={wp(25)} color={'#fff'} style={styles.icon} />
@@ -249,7 +282,7 @@ const maStateToProps = (state: RootState) => ({
 })
 
 const mapDispatchToState = (dispatch: Function) => ({
-  addItem: (title: string) => dispatch(addItem(title)),
+  addItem: (item: Omit<ListItem, 'id'>) => dispatch(addItem(item)),
 })
 
 export default connect(

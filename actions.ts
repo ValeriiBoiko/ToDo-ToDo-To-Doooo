@@ -16,15 +16,14 @@ export function addItemAction(item: ListItem): TodoItemAction {
   }
 }
 
-export function addItem(title: string) {
+export function addItem(item: Omit<ListItem, 'id'>) {
   return (dispatch: Function, getState: Function): void => {
     const list: ListItem[] = getState().list;
 
     dispatch(
       addItemAction({
+        ...item,
         id: list[list.length - 1].id + 1,
-        title: title,
-        isDone: false,
       })
     )
   }
