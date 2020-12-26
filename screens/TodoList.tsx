@@ -121,7 +121,7 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
             style={styles.addItem}
             activeOpacity={.7}
             rippleColor={'rgba(255,255,255,.25)'} >
-            <Icon name={'add'} size={wp(28)} color={colors.background} />
+            <Icon name={'add'} size={wp(28)} color={colors.invertedText} />
             <Text style={styles.addItemLabel}>Add item</Text>
           </Touchable>
         </Transitioning.View>
@@ -169,7 +169,7 @@ const getStyles = (colors: ColorTheme) => StyleSheet.create({
     fontSize: wp(18),
     fontFamily: Font.BOLD,
     lineHeight: wp(18),
-    color: colors.background,
+    color: colors.invertedText,
   }
 })
 

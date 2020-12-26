@@ -18,13 +18,15 @@ export const LightTheme: ColorTheme = {
   background: '#fafafa',
   border: '#ccc',
   text: '#444',
+  invertedText: '#fafafa',
   card: '#e9e9e9',
 };
 
 export const DarkTheme: ColorTheme = {
   primary: '#f4bc25',
   background: '#222',
-  border: '#ccc',
+  border: '#888',
   text: '#fafafa',
+  invertedText: '#444',
   card: '#353535',
 };

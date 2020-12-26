@@ -18,8 +18,7 @@ const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
 function NewItem({ colors, addItem, onAdded }: Props, ref: ForwardedRef<TextInput>) {
   const styles = useMemo(() => getStyles(colors), [colors]);
-  const [height, setHeight] = useState(wp(-120));
-  const animatedPosition = useRef(new Animated.Value(0)).current;
+  const animatedPosition = useRef(new Animated.Value(wp(-120))).current;
   const animatedOptions = useRef(new Animated.Value(0)).current;
   const [isOptionsOpen, setOptionsFlag] = useState(false);
   const [item, setItem] = useState({
@@ -35,7 +34,7 @@ function NewItem({ colors, addItem, onAdded }: Props, ref: ForwardedRef<TextInpu
       {
         toValue: targetValue,
         duration: 250,
-        easing: Easing.linear,
+        easing: Easing.bezier(0, .6, .53, .82),
         useNativeDriver: false,
       }
     ).start();
@@ -64,12 +63,10 @@ function NewItem({ colors, addItem, onAdded }: Props, ref: ForwardedRef<TextInpu
   }
 
   useEffect(() => {
-    const onKeyboardShow = (e: KeyboardEvent) => setHeight(e.endCoordinates.height);
-    const onKeyboardDidShow = (e: KeyboardEvent) => {
-      setHeight(Dimensions.get('screen').height - e.endCoordinates.screenY - wp(50));
-    };
+    const onKeyboardWillShow = (e: KeyboardEvent) => runPositionAnimation(e.endCoordinates.height);
+    const onKeyboardDidShow = (e: KeyboardEvent) => runPositionAnimation(0);
     const onKeyboardHide = () => {
-      setHeight(wp(-120));
+      runPositionAnimation(wp(-120));
       setOptionsFlag(false);
       setItem({
         isDone: false,
@@ -81,7 +78,7 @@ function NewItem({ colors, addItem, onAdded }: Props, ref: ForwardedRef<TextInpu
     };
 
     if (Platform.OS === 'ios') {
-      Keyboard.addListener('keyboardWillShow', onKeyboardShow);
+      Keyboard.addListener('keyboardWillShow', onKeyboardWillShow);
       Keyboard.addListener('keyboardWillHide', onKeyboardHide);
     } else {
       Keyboard.addListener('keyboardDidShow', onKeyboardDidShow);
@@ -89,25 +86,27 @@ function NewItem({ colors, addItem, onAdded }: Props, ref: ForwardedRef<TextInpu
     }
 
     return () => {
-      Keyboard.removeListener('keyboardWillShow', onKeyboardShow);
+      Keyboard.removeListener('keyboardWillShow', onKeyboardWillShow);
       Keyboard.removeListener('keyboardDidShow', onKeyboardDidShow);
       Keyboard.removeListener('keyboardWillHide', onKeyboardHide);
       Keyboard.removeListener('keyboardDidHide', onKeyboardHide);
     }
   }, []);
 
-  useEffect(() => {
-    if (!height) {
-      runPositionAnimation(0)
-    } else {
-      runPositionAnimation(1)
-    }
-  }, [height]);
+  // useEffect(() => {
+  //   if (!height) {
+  //     runPositionAnimation(0)
+  //   } else {
+  //     runPositionAnimation(1)
+  //   }
+  // }, [height]);
 
-  const position = animatedPosition.interpolate({
-    inputRange: [0, 1],
-    outputRange: [wp(-120), height],
-  });
+  // const position = animatedPosition.interpolate({
+  //   inputRange: [0, 1],
+  //   outputRange: [wp(-120), height],
+  // });
+
+  // console.log(position, height)
 
   const optionsPosition = animatedOptions.interpolate({
     inputRange: [0, 1],
@@ -122,7 +121,7 @@ function NewItem({ colors, addItem, onAdded }: Props, ref: ForwardedRef<TextInpu
   return (
     <Animated.View style={[
       styles.container,
-      { bottom: position, }
+      { bottom: animatedPosition, }
     ]}>
       <View style={styles.moreOptions}>
         <Animated.View style={[
@@ -132,6 +131,7 @@ function NewItem({ colors, addItem, onAdded }: Props, ref: ForwardedRef<TextInpu
           <TextInput
             multiline={true}
             placeholder={'Type a note'}
+            placeholderTextColor={colors.border}
             style={styles.note}
             value={item.note}
             onChangeText={(note) => {
@@ -176,6 +176,7 @@ function NewItem({ colors, addItem, onAdded }: Props, ref: ForwardedRef<TextInpu
         <TextInput
           ref={ref}
           placeholder={'Item title'}
+          placeholderTextColor={colors.border}
           value={item.title}
           onChangeText={(title) => {
             setItem({
@@ -198,7 +199,7 @@ function NewItem({ colors, addItem, onAdded }: Props, ref: ForwardedRef<TextInpu
               });
             }
           }} >
-          <Icon name={'add'} size={wp(25)} color={'#fff'} style={styles.icon} />
+          <Icon name={'add'} size={wp(25)} color={colors.invertedText} style={styles.icon} />
         </Pressable>
       </View>
 
@@ -275,7 +276,7 @@ const getStyles = (colors: ColorTheme) => StyleSheet.create({
   dailyLabel: {
     fontSize: wp(16),
     fontFamily: Font.REGULAR,
-    color: colors.text,
+    color: colors.border,
     marginRight: wp(8),
   }
 });

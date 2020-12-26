@@ -69,7 +69,7 @@ function Item({ id, title, isDone, note, isDaily, colors, onPress, onLongPress, 
                 borderColor: isDone ? colors.primary : colors.border,
               }
             ]}>
-              {isDone && <Icon name='done' size={wp(24)} color={'#f5f5f5'} />}
+              {isDone && <Icon name='done' size={wp(24)} color={colors.invertedText} />}
             </View>
 
             <Text style={styles.title}>{title}</Text>

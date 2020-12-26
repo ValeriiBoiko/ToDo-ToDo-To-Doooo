@@ -16,6 +16,7 @@ export interface ColorTheme {
   background: string,
   border: string,
   text: string,
+  invertedText: string,
   card: string,
 }
 
