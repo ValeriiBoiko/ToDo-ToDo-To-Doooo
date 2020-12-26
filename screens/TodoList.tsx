@@ -86,7 +86,7 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
         ...contextMenu,
         isVisible: false,
       })
-    }, 250)
+    }, 150)
   }
 
   const items = sorteredList.map((item) => (
@@ -119,7 +119,7 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
           <Touchable
             onPress={onAddItem}
             style={styles.addItem}
-            activeOpacity={.25}
+            activeOpacity={.7}
             rippleColor={'rgba(255,255,255,.25)'} >
             <Icon name={'add'} size={wp(28)} color={colors.background} />
             <Text style={styles.addItemLabel}>Add item</Text>

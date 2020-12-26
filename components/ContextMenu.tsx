@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Font } from '../constants';
 import { wp } from '../utils';
@@ -38,7 +38,7 @@ function ContextMenu({ isVisible, items, position, ...props }: Props) {
         <View
           style={{
             position: 'absolute',
-            overflow: 'hidden',
+            overflow: Platform.OS === 'ios' ? 'visible' : 'hidden',
             left: left,
             top: top,
             backgroundColor: props.backgroundColor,

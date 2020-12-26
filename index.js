@@ -9,8 +9,6 @@ import configureStore from './store';
 
 const { store, persistor } = configureStore();
 
-StatusBar.setHidden(true);
-
 AppRegistry.registerComponent(appName, () => () => (
   <PersistGate persistor={persistor}>
     <Provider store={store}>

@@ -1,5 +1,5 @@
 import React, { ForwardedRef, forwardRef, useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Keyboard, KeyboardEvent, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Animated, Dimensions, Easing, Keyboard, KeyboardEvent, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect } from 'react-redux';
 import { addItem } from '../actions';
@@ -65,7 +65,9 @@ function NewItem({ colors, addItem, onAdded }: Props, ref: ForwardedRef<TextInpu
 
   useEffect(() => {
     const onKeyboardShow = (e: KeyboardEvent) => setHeight(e.endCoordinates.height);
-    const onKeyboardDidShow = (e: KeyboardEvent) => setHeight(e.endCoordinates.height);
+    const onKeyboardDidShow = (e: KeyboardEvent) => {
+      setHeight(Dimensions.get('screen').height - e.endCoordinates.screenY - wp(50));
+    };
     const onKeyboardHide = () => {
       setHeight(wp(-120));
       setOptionsFlag(false);

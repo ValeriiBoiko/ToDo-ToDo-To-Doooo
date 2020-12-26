@@ -9,7 +9,7 @@ interface Props extends TouchableOpacityProps, TouchableNativeFeedbackProps {
 function Touchable({ style, children, rippleColor, ...props }: Props) {
   if (Platform.OS == 'ios') {
     return (
-      <TouchableOpacity {...props}>
+      <TouchableOpacity {...props} style={style}>
         {children}
       </TouchableOpacity>
     )
