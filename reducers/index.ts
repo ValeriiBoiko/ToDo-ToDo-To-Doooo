@@ -3,13 +3,7 @@ import { RootState, TodoItemAction } from '../types';
 
 const initialState = {
   theme: LightTheme,
-  list: [
-    {
-      id: 1,
-      title: 'Item',
-      isDone: false,
-    }
-  ],
+  list: [],
 };
 
 function todoReducer(state: RootState = initialState, action: TodoItemAction): RootState {
@@ -25,6 +19,12 @@ function todoReducer(state: RootState = initialState, action: TodoItemAction): R
       return {
         ...state,
         list: state.list.concat(action.payload),
+      }
+
+    case Action.DELETE_ITEM:
+      return {
+        ...state,
+        list: state.list.filter(item => item.id !== action.payload.id)
       }
   }
 

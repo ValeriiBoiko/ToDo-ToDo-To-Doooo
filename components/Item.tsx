@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, GestureResponderEvent, NativeEventEmitter, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Font } from '../constants';
 import { ColorTheme, ListItem, RootState } from '../types';
 import { wp } from '../utils';
@@ -8,10 +8,11 @@ import { connect } from 'react-redux';
 
 interface Props extends ListItem {
   colors: ColorTheme,
+  onLongPress?: (e: GestureResponderEvent) => void,
   [props: string]: any,
 }
 
-function Item({ id, title, isDone, note, isDaily, style, colors, onPress, ...props }: Props) {
+function Item({ id, title, isDone, note, isDaily, colors, onPress, onLongPress, ...props }: Props) {
   const styles = useMemo(() => getStyles(colors), [colors]);
   const [isOpen, setOpenFlag] = useState(false);
   const [noteMaxHeight, setNoteHeight] = useState(150);
@@ -44,53 +45,62 @@ function Item({ id, title, isDone, note, isDaily, style, colors, onPress, ...pro
   })
 
   return (
-    <Animated.View {...props} style={[
-      styles.container, style,
-      { height: containerHeight }
+    <View {...props} style={[
+      styles.container,
+      props.style
     ]}>
-      <View style={styles.item} onLayout={({ nativeEvent }) => {
-        setItemHeight(nativeEvent.layout.height);
-      }}>
+      <Animated.View
+        style={{
+          height: containerHeight,
+          overflow: 'hidden'
+        }}>
+        <View style={styles.item} onLayout={({ nativeEvent }) => {
+          setItemHeight(nativeEvent.layout.height);
+        }}>
 
-        <Pressable style={{ flex: 1, ...styles.item }} onPress={onPress}>
-          <View style={[
-            styles.checkbox,
+          <Pressable
+            style={{ flex: 1, ...styles.item }}
+            onLongPress={(e) => { onLongPress && onLongPress(e) }}
+            onPress={onPress}>
+            <View style={[
+              styles.checkbox,
+              {
+                backgroundColor: isDone ? colors.primary : colors.background,
+                borderColor: isDone ? colors.primary : colors.border,
+              }
+            ]}>
+              {isDone && <Icon name='done' size={wp(24)} color={'#f5f5f5'} />}
+            </View>
+
+            <Text style={styles.title}>{title}</Text>
+
             {
-              backgroundColor: isDone ? colors.primary : colors.background,
-              borderColor: isDone ? colors.primary : colors.border,
+              isDaily && (
+                <View>
+                  <Icon name='date-range' size={wp(28)} color={colors.border} />
+                  <View style={styles.dailyBadge} />
+                </View>
+              )
             }
-          ]}>
-            {isDone && <Icon name='done' size={wp(24)} color={'#f5f5f5'} />}
-          </View>
-
-          <Text style={styles.title}>{title}</Text>
+          </Pressable>
 
           {
-            isDaily && (
-              <View>
-                <Icon name='date-range' size={wp(28)} color={colors.border} />
-                <View style={styles.dailyBadge} />
-              </View>
-            )
+            note ? (
+              <Pressable style={{ paddingLeft: wp(20), }} onPress={() => setOpenFlag(!isOpen)}>
+                <Icon name={'expand-more'} size={wp(32)} color={colors.border} />
+              </Pressable>
+            ) : null
           }
-        </Pressable>
+        </View>
 
-        {
-          note ? (
-            <Pressable style={{ paddingLeft: wp(20), }} onPress={() => setOpenFlag(!isOpen)}>
-              <Icon name={'expand-more'} size={wp(32)} color={colors.border} />
-            </Pressable>
-          ) : null
-        }
-      </View>
-
-      <Text
-        onLayout={({ nativeEvent }) => setNoteHeight(nativeEvent.layout.height)}
-        style={[
-          { top: itemHeight },
-          styles.note
-        ]}>{note}</Text>
-    </Animated.View>
+        <Text
+          onLayout={({ nativeEvent }) => setNoteHeight(nativeEvent.layout.height)}
+          style={[
+            { top: itemHeight },
+            styles.note
+          ]}>{note}</Text>
+      </Animated.View>
+    </View >
   )
 }
 

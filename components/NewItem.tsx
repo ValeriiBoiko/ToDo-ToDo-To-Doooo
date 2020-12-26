@@ -10,15 +10,15 @@ import Toggle from './Toggle';
 
 interface Props {
   colors: ColorTheme,
+  onAdded?: () => void,
   addItem: (item: Omit<ListItem, 'id'>) => Function,
 }
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
-function NewItem({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) {
+function NewItem({ colors, addItem, onAdded }: Props, ref: ForwardedRef<TextInput>) {
   const styles = useMemo(() => getStyles(colors), [colors]);
   const [height, setHeight] = useState(wp(-120));
-  const [daily, setDailyFlag] = useState(false);
   const animatedPosition = useRef(new Animated.Value(0)).current;
   const animatedOptions = useRef(new Animated.Value(0)).current;
   const [isOptionsOpen, setOptionsFlag] = useState(false);
@@ -186,6 +186,7 @@ function NewItem({ colors, addItem }: Props, ref: ForwardedRef<TextInput>) {
           style={[styles.button, styles.addButton]}
           onPress={() => {
             if (item.title.length) {
+              onAdded && onAdded();
               addItem(item);
               setItem({
                 isDone: false,

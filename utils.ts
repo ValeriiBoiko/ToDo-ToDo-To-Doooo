@@ -4,7 +4,7 @@ const basicWidth = 375;
 const screenWidth = Dimensions.get('window').width;
 
 function widthDependedPixel(pixel: number): number {
-  return (basicWidth / screenWidth) * pixel;
+  return (screenWidth / basicWidth) * pixel;
 }
 
 export {
