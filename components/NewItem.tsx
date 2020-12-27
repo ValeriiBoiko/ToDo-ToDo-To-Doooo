@@ -1,5 +1,5 @@
 import React, { ForwardedRef, forwardRef, useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Dimensions, Easing, Keyboard, KeyboardEvent, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Animated, Easing, Keyboard, KeyboardEvent, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect } from 'react-redux';
 import { addItem } from '../actions';
@@ -92,21 +92,6 @@ function NewItem({ colors, addItem, onAdded }: Props, ref: ForwardedRef<TextInpu
       Keyboard.removeListener('keyboardDidHide', onKeyboardHide);
     }
   }, []);
-
-  // useEffect(() => {
-  //   if (!height) {
-  //     runPositionAnimation(0)
-  //   } else {
-  //     runPositionAnimation(1)
-  //   }
-  // }, [height]);
-
-  // const position = animatedPosition.interpolate({
-  //   inputRange: [0, 1],
-  //   outputRange: [wp(-120), height],
-  // });
-
-  // console.log(position, height)
 
   const optionsPosition = animatedOptions.interpolate({
     inputRange: [0, 1],
@@ -226,6 +211,7 @@ const getStyles = (colors: ColorTheme) => StyleSheet.create({
     paddingHorizontal: wp(12),
     fontSize: wp(16),
     fontFamily: Font.REGULAR,
+    color: colors.text,
     backgroundColor: colors.card,
   },
   icon: {
@@ -256,6 +242,7 @@ const getStyles = (colors: ColorTheme) => StyleSheet.create({
     padding: 0,
     marginRight: wp(8),
     borderRadius: wp(8),
+    color: colors.text,
     fontSize: wp(16),
     fontFamily: Font.REGULAR,
     textAlignVertical: 'top',

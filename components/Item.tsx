@@ -69,7 +69,7 @@ function Item({ id, title, isDone, note, isDaily, colors, onPress, onLongPress, 
                 borderColor: isDone ? colors.primary : colors.border,
               }
             ]}>
-              {isDone && <Icon name='done' size={wp(24)} color={colors.invertedText} />}
+              {isDone && <Icon name='done' size={wp(20)} color={colors.invertedText} />}
             </View>
 
             <Text style={styles.title}>{title}</Text>
@@ -77,7 +77,7 @@ function Item({ id, title, isDone, note, isDaily, colors, onPress, onLongPress, 
             {
               isDaily && (
                 <View>
-                  <Icon name='date-range' size={wp(28)} color={colors.border} />
+                  <Icon name='date-range' size={wp(22)} color={colors.border} />
                   <View style={styles.dailyBadge} />
                 </View>
               )
@@ -114,9 +114,9 @@ const getStyles = (colors: ColorTheme) => StyleSheet.create({
     alignItems: 'center',
   },
   checkbox: {
-    width: wp(40),
-    height: wp(40),
-    borderRadius: wp(40),
+    width: wp(35),
+    height: wp(35),
+    borderRadius: wp(35),
     marginRight: wp(10),
     alignItems: 'center',
     justifyContent: 'center',
@@ -140,10 +140,10 @@ const getStyles = (colors: ColorTheme) => StyleSheet.create({
   },
   note: {
     position: 'absolute',
-    paddingLeft: wp(50),
+    paddingLeft: wp(45),
     paddingTop: wp(8),
-    fontSize: wp(16),
-    lineHeight: wp(24),
+    fontSize: wp(14),
+    lineHeight: wp(20),
     color: colors.text,
     opacity: .7,
     fontFamily: Font.REGULAR

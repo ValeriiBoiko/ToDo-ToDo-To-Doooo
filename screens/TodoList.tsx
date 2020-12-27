@@ -1,5 +1,5 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { GestureResponderEvent, ScrollView, StyleSheet, Text, TextInput } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { GestureResponderEvent, ScrollView, StatusBar, StyleSheet, Text, TextInput } from 'react-native';
 import { connect } from 'react-redux';
 import { Font } from '../constants';
 import { ColorTheme, ListItem, RootState } from '../types';
@@ -103,6 +103,14 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
     />
   ))
 
+  useEffect(() => {
+    if (colors.background > '#777') {
+      StatusBar.setBarStyle('dark-content');
+    } else {
+      StatusBar.setBarStyle('light-content');
+    }
+  }, [colors]);
+
   return (
     <>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={[
@@ -158,6 +166,7 @@ const getStyles = (colors: ColorTheme) => StyleSheet.create({
   },
   addItem: {
     marginTop: wp(12),
+    marginHorizontal: wp(4),
     padding: wp(8),
     flexDirection: 'row',
     alignItems: 'center',
