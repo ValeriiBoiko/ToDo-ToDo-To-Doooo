@@ -11,12 +11,13 @@ import Toggle from './Toggle';
 interface Props {
   colors: ColorTheme,
   onAdded?: () => void,
+  onCancelled?: () => void,
   addItem: (item: Omit<ListItem, 'id'>) => Function,
 }
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
-function NewItem({ colors, addItem, onAdded }: Props, ref: ForwardedRef<TextInput>) {
+function NewItem({ colors, addItem, onAdded, onCancelled }: Props, ref: ForwardedRef<TextInput>) {
   const styles = useMemo(() => getStyles(colors), [colors]);
   const animatedPosition = useRef(new Animated.Value(wp(-120))).current;
   const animatedOptions = useRef(new Animated.Value(0)).current;
@@ -75,6 +76,7 @@ function NewItem({ colors, addItem, onAdded }: Props, ref: ForwardedRef<TextInpu
         note: ''
       });
       runOptionsAnimation(0);
+      onCancelled && onCancelled();
     };
 
     if (Platform.OS === 'ios') {
