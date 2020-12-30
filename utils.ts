@@ -1,7 +1,8 @@
 import { Dimensions } from "react-native"
 
 const basicWidth = 375;
-const screenWidth = Dimensions.get('window').width;
+const { width, height } = Dimensions.get('window');
+const screenWidth = height / width < 1.75 ? height / 1.75 : width;
 
 function widthDependedPixel(pixel: number): number {
   return (screenWidth / basicWidth) * pixel;

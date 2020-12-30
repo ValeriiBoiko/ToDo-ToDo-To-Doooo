@@ -26,21 +26,13 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => getStyles(colors), [colors]);
   const addItemRef = useRef<TextInput>(null);
-  const sorteredList = list.concat([]);
+  const sorteredList = list.concat([]).sort((cur, next) => cur.isDone ? 1 : -1);;
   const [activeItem, setActiveItem] = useState<ListItem | null>(null);
+  const transitioningRef = useRef<TransitioningView>(null);
   const [contextMenu, setContextMenu] = useState({
     isVisible: false,
     position: { x: 0, y: 0, }
   })
-  sorteredList.sort((cur, next) => !cur.isDone ? -1 : 1);
-  const transitioningRef = useRef<TransitioningView>(null);
-  const transition = (
-    <Transition.Together>
-      <Transition.In interpolation={'easeInOut'} durationMs={100} />
-      <Transition.Out interpolation={'easeInOut'} durationMs={100} />
-      <Transition.Change interpolation={'easeInOut'} durationMs={350} />
-    </Transition.Together>
-  )
 
   const onAddItem = () => {
     if (addItemRef && addItemRef.current) {
@@ -48,7 +40,7 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
     }
   };
 
-  const onItemPress = (item: ListItem): void => {
+  const toggleItem = (item: ListItem): void => {
     if (transitioningRef && transitioningRef.current) {
       transitioningRef.current.animateNextTransition();
     }
@@ -58,7 +50,7 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
     })
   };
 
-  const onItemLongPress = (item: ListItem, { nativeEvent }: GestureResponderEvent): void => {
+  const showItemContextMenu = (item: ListItem, { nativeEvent }: GestureResponderEvent): void => {
     setActiveItem(item);
     setContextMenu({
       isVisible: true,
@@ -69,7 +61,7 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
     })
   };
 
-  const onRequestMenuClose = (): void => {
+  const onCloseMenuRequest = (): void => {
     setActiveItem(null);
     setContextMenu({
       ...contextMenu,
@@ -83,7 +75,7 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
       deleteItem(activeItem);
     };
 
-    setTimeout(onRequestMenuClose, 150)
+    setTimeout(onCloseMenuRequest, 150)
   };
 
   const items = sorteredList.map((item) => (
@@ -95,8 +87,8 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
         borderRadius: wp(8),
         backgroundColor: activeItem && item.id === activeItem.id ? colors.card : colors.background,
       }}
-      onPress={() => onItemPress(item)}
-      onLongPress={(event: GestureResponderEvent) => onItemLongPress(item, event)}
+      onPress={() => toggleItem(item)}
+      onLongPress={(event: GestureResponderEvent) => showItemContextMenu(item, event)}
     />
   ));
 
@@ -190,57 +182,8 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
 
   return (
     <>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={[
-        styles.container,
-        {
-          paddingTop: insets.top || wp(15),
-          paddingBottom: insets.bottom,
-        }
-      ]}>
-
-        <Transitioning.View ref={transitioningRef} transition={transition} style={{ flex: 1, }}>
-          {items}
-
-          {
-            list.length ? (
-              <Touchable
-                onPress={onAddItem}
-                style={styles.addItem}
-                activeOpacity={.7}
-                rippleColor={'rgba(255,255,255,.25)'} >
-                <Icon name={'add'} size={wp(28)} color={colors.invertedText} />
-                <Text style={styles.addItemLabel}>Add item</Text>
-              </Touchable>
-            ) : (
-                <View style={styles.emptyListWrapper}>
-                  <TapGestureHandler onHandlerStateChange={onTap} >
-                    <Animated.View
-                      style={[
-                        styles.emptyListButton,
-                        {
-                          opacity: opacity,
-                          width: size,
-                          height: size,
-                          borderRadius: size,
-                        }
-                      ]}
-                    >
-                      <Icon name={'add'} size={wp(45)} color={colors.invertedText} />
-                    </Animated.View>
-                  </TapGestureHandler>
-                </View>
-              )
-          }
-        </Transitioning.View>
-      </ScrollView>
-
-      <NewItemInput
-        ref={addItemRef}
-        onCancelled={fireTapEvent}
-        onAdded={() => transitioningRef.current?.animateNextTransition()}
-      />
-
       <ContextMenu
+        style={{ flex: 1 }}
         {...contextMenu}
         items={[
           {
@@ -254,8 +197,68 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
         ]}
         textColor={colors.text}
         backgroundColor={colors.background}
-        onRequestClose={onRequestMenuClose}
-      />
+        onCloseRequest={onCloseMenuRequest}
+      >
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={[
+          styles.container,
+          {
+            paddingTop: insets.top || wp(15),
+            paddingBottom: insets.bottom,
+          }
+        ]}>
+
+          <Transitioning.View
+            ref={transitioningRef}
+            transition={(
+              <Transition.Together>
+                <Transition.In interpolation={'easeInOut'} durationMs={100} />
+                <Transition.Out interpolation={'easeInOut'} durationMs={100} />
+                <Transition.Change interpolation={'easeInOut'} durationMs={350} />
+              </Transition.Together>
+            )}
+            style={{ flex: 1 }}>
+            {items}
+
+            {
+              list.length ? (
+                <Touchable
+                  onPress={onAddItem}
+                  style={styles.addItem} ч
+                  activeOpacity={.7}
+                  rippleColor={'rgba(255,255,255,.25)'} >
+                  <Icon name={'add'} size={wp(28)} color={colors.invertedText} />
+                  <Text style={styles.addItemLabel}>Add item</Text>
+                </Touchable>
+              ) : (
+                  <View style={styles.emptyListWrapper}>
+                    <TapGestureHandler onHandlerStateChange={onTap} >
+                      <Animated.View
+                        style={[
+                          styles.emptyListButton,
+                          {
+                            opacity: opacity,
+                            width: size,
+                            height: size,
+                            borderRadius: size,
+                          }
+                        ]}
+                      >
+                        <Icon name={'add'} size={wp(45)} color={colors.invertedText} />
+                      </Animated.View>
+                    </TapGestureHandler>
+                  </View>
+                )
+            }
+          </Transitioning.View>
+        </ScrollView>
+
+        <NewItemInput
+          ref={addItemRef}
+          onCancelled={fireTapEvent}
+          onAdded={() => transitioningRef.current?.animateNextTransition()}
+        />
+
+      </ContextMenu>
     </>
   )
 }

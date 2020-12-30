@@ -1,5 +1,5 @@
-import React from 'react';
-import { Dimensions, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { Children } from 'react';
+import { Dimensions, Platform, Pressable, StyleSheet, Text, View, ViewProps } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Font } from '../constants';
 import { wp } from '../utils';
@@ -14,58 +14,63 @@ interface ContextMenuItem {
   onPress: () => void,
 }
 
-interface Props {
+interface Props extends ViewProps {
   isVisible: boolean,
   backgroundColor: string,
   textColor: string,
   items: ContextMenuItem[],
-  onRequestClose: () => void,
+  onCloseRequest: () => void,
+  children: Element | Element[],
   position: {
     x: number,
     y: number,
   }
 }
 
-function ContextMenu({ isVisible, items, position, ...props }: Props) {
+function ContextMenu({ isVisible, items, position, onCloseRequest, backgroundColor, textColor, children, ...props }: Props) {
   const screen = Dimensions.get('window');
   const left = position.x > screen.width - wp(170) ? screen.width - wp(170) : position.x
   const top = position.y > screen.height - items.length * wp(40) ? screen.height - items.length * wp(40) : position.y
 
   return (
-    isVisible ? (
-      <Pressable onPress={props.onRequestClose}
-        style={StyleSheet.absoluteFill}>
-        <View
-          style={{
-            position: 'absolute',
-            overflow: Platform.OS === 'ios' ? 'visible' : 'hidden',
-            left: left,
-            top: top,
-            backgroundColor: props.backgroundColor,
-            borderRadius: wp(8),
-            shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-            elevation: 5,
-          }}>
-          {
-            items.map((item, index) => (
-              <Touchable style={styles.item} key={index} onPress={item.onPress}>
-                {item.icon && <Icon size={wp(24)} {...item.icon} />}
-                <Text style={[
-                  styles.itemLabel,
-                  { color: props.textColor }
-                ]}>{item.label}</Text>
-              </Touchable>
-            ))
-          }
-        </View>
-      </Pressable>
-    ) : null
+    <View {...props}>
+      {children}
+
+      {isVisible ? (
+        <Pressable onPress={onCloseRequest}
+          style={StyleSheet.absoluteFill}>
+          <View
+            style={{
+              position: 'absolute',
+              overflow: Platform.OS === 'ios' ? 'visible' : 'hidden',
+              left: left,
+              top: top,
+              backgroundColor: backgroundColor,
+              borderRadius: wp(8),
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 0.25,
+              shadowRadius: 3.84,
+              elevation: 5,
+            }}>
+            {
+              items.map((item, index) => (
+                <Touchable style={styles.item} key={index} onPress={item.onPress}>
+                  {item.icon && <Icon size={wp(24)} {...item.icon} />}
+                  <Text style={[
+                    styles.itemLabel,
+                    { color: textColor }
+                  ]}>{item.label}</Text>
+                </Touchable>
+              ))
+            }
+          </View>
+        </Pressable>
+      ) : null}
+    </View>
   )
 }
 
