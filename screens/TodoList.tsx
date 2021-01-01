@@ -216,14 +216,14 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
                 <Transition.Change interpolation={'easeInOut'} durationMs={350} />
               </Transition.Together>
             )}
-            style={{ flex: 1 }}>
+            style={{ flex: 1, }}>
             {items}
 
             {
               list.length ? (
                 <Touchable
                   onPress={onAddItem}
-                  style={styles.addItem} ч
+                  style={styles.addItem}
                   activeOpacity={.7}
                   rippleColor={'rgba(255,255,255,.25)'} >
                   <Icon name={'add'} size={wp(28)} color={colors.invertedText} />
@@ -257,7 +257,6 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
           onCancelled={fireTapEvent}
           onAdded={() => transitioningRef.current?.animateNextTransition()}
         />
-
       </ContextMenu>
     </>
   )

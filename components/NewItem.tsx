@@ -19,7 +19,7 @@ const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
 function NewItem({ colors, addItem, onAdded, onCancelled }: Props, ref: ForwardedRef<TextInput>) {
   const styles = useMemo(() => getStyles(colors), [colors]);
-  const animatedPosition = useRef(new Animated.Value(wp(-120))).current;
+  const animatedPosition = useRef(new Animated.Value(wp(-200))).current;
   const animatedOptions = useRef(new Animated.Value(0)).current;
   const [isOptionsOpen, setOptionsFlag] = useState(false);
   const [item, setItem] = useState({
@@ -63,21 +63,24 @@ function NewItem({ colors, addItem, onAdded, onCancelled }: Props, ref: Forwarde
     }
   }
 
+  const onHide = () => {
+    Keyboard.dismiss();
+    runPositionAnimation(wp(-200));
+    setOptionsFlag(false);
+    setItem({
+      isDone: false,
+      isDaily: false,
+      title: '',
+      note: ''
+    });
+    runOptionsAnimation(0);
+    onCancelled && onCancelled();
+  }
+
   useEffect(() => {
     const onKeyboardWillShow = (e: KeyboardEvent) => runPositionAnimation(e.endCoordinates.height);
     const onKeyboardDidShow = (e: KeyboardEvent) => runPositionAnimation(0);
-    const onKeyboardHide = () => {
-      runPositionAnimation(wp(-120));
-      setOptionsFlag(false);
-      setItem({
-        isDone: false,
-        isDaily: false,
-        title: '',
-        note: ''
-      });
-      runOptionsAnimation(0);
-      onCancelled && onCancelled();
-    };
+    const onKeyboardHide = () => onHide();
 
     if (Platform.OS === 'ios') {
       Keyboard.addListener('keyboardWillShow', onKeyboardWillShow);
@@ -108,56 +111,58 @@ function NewItem({ colors, addItem, onAdded, onCancelled }: Props, ref: Forwarde
   return (
     <Animated.View style={[
       styles.container,
-      { bottom: animatedPosition, }
+      { bottom: animatedPosition }
     ]}>
-      <View style={styles.moreOptions}>
-        <Animated.View style={[
-          styles.optionsContainer,
-          { transform: [{ translateY: optionsPosition }] }
-        ]}>
-          <TextInput
-            multiline={true}
-            placeholder={'Type a note'}
-            placeholderTextColor={colors.border}
-            style={styles.note}
-            value={item.note}
-            onChangeText={(note) => {
-              setItem({
-                ...item,
-                note
-              })
-            }}
-          />
-          <View style={styles.daily}>
-            <Text style={styles.dailyLabel}>Daily</Text>
-            <Toggle
-              isOn={item.isDaily}
-              onToggle={(isDaily) => {
+      <Pressable onPress={onHide}>
+        <View style={styles.moreOptions}>
+          <Animated.View style={[
+            styles.optionsContainer,
+            { transform: [{ translateY: optionsPosition }] }
+          ]}>
+            <TextInput
+              multiline={true}
+              placeholder={'Type a note'}
+              placeholderTextColor={colors.border}
+              style={styles.note}
+              value={item.note}
+              onChangeText={(note) => {
                 setItem({
                   ...item,
-                  isDaily
+                  note
                 })
               }}
-              trackColor={colors.background}
-              onThumbColor={colors.primary}
-              offThumbColor={colors.border}
             />
-          </View>
-        </Animated.View>
+            <View style={styles.daily}>
+              <Text style={styles.dailyLabel}>Daily</Text>
+              <Toggle
+                isOn={item.isDaily}
+                onToggle={(isDaily) => {
+                  setItem({
+                    ...item,
+                    isDaily
+                  })
+                }}
+                trackColor={colors.background}
+                onThumbColor={colors.primary}
+                offThumbColor={colors.border}
+              />
+            </View>
+          </Animated.View>
 
-        <Pressable
-          style={[styles.button, styles.moreButton]}
-          onPress={onMorePressed} >
-          <AnimatedIcon
-            name={'expand-less'}
-            size={wp(30)}
-            color={colors.border}
-            style={[
-              styles.icon,
-              { transform: [{ rotate: moreButtonAngle }] }
-            ]} />
-        </Pressable>
-      </View>
+          <Pressable
+            style={[styles.button, styles.moreButton]}
+            onPress={onMorePressed} >
+            <AnimatedIcon
+              name={'expand-less'}
+              size={wp(30)}
+              color={colors.border}
+              style={[
+                styles.icon,
+                { transform: [{ rotate: moreButtonAngle }] }
+              ]} />
+          </Pressable>
+        </View>
+      </Pressable>
 
       <View style={{ flexDirection: 'row' }}>
         <TextInput
