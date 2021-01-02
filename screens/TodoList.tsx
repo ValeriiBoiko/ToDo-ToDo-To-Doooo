@@ -176,7 +176,7 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
 
   const size = interpolate(animation, {
     inputRange: [-1, 0, 1],
-    outputRange: [wpdp(0), wpdp(30), Dimensions.get('window').width]
+    outputRange: [wpdp(0), wpdp(35), Dimensions.get('window').width]
   });
 
 

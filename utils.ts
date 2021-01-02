@@ -9,7 +9,7 @@ function widthDependedPixel(pixel: number): number {
 }
 
 function widthPercentageToDp(percentage: number): number {
-  return basicWidth * (percentage / 100);
+  return screenWidth * (percentage / 100);
 }
 
 export {
