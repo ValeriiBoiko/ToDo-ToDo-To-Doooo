@@ -130,7 +130,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.typescripttodo"
+        applicationId "com.valeriiboiko.doit"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

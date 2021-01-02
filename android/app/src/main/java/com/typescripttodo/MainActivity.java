@@ -1,4 +1,4 @@
-package com.typescripttodo;
+package com.valeriiboiko.doit;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.typescripttodo">
+  package="com.valeriiboiko.doit">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
