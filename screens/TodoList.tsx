@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Dimensions, GestureResponderEvent, ScrollView, StatusBar, StyleSheet, Text, TextInput, View } from 'react-native';
-import { connect } from 'react-redux';
+import { batch, connect } from 'react-redux';
 import { Font } from '../constants';
 import { ColorTheme, ListItem, RootState } from '../types';
 import { wp, wpdp } from '../utils';
@@ -46,6 +46,7 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
     }
     updateItem({
       ...item,
+      updated: new Date(),
       isDone: !item.isDone,
     })
   };
@@ -99,6 +100,28 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
       StatusBar.setBarStyle('light-content');
     }
   }, [colors]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      const date = new Date();
+
+      if (transitioningRef && transitioningRef.current) {
+        transitioningRef.current.animateNextTransition();
+      }
+
+      batch(() => {
+        sorteredList.forEach((item) => {
+          if (item.isDaily && item.updated && new Date(item.updated).getDate() !== date.getDate()) {
+            updateItem({
+              ...item,
+              updated: date,
+              isDone: false,
+            })
+          }
+        })
+      })
+    }, 500)
+  }, [])
 
   const runOpacity = (clock: Clock, gestureState: Value<number>) => {
     const state = {

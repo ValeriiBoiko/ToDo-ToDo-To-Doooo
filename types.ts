@@ -4,6 +4,7 @@ export interface ListItem {
   note?: string,
   isDaily: boolean,
   isDone: boolean,
+  updated?: Date | null
 };
 
 export interface RootState {

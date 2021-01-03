@@ -22,11 +22,12 @@ function NewItem({ colors, addItem, onAdded, onCancelled }: Props, ref: Forwarde
   const animatedPosition = useRef(new Animated.Value(wp(-200))).current;
   const animatedOptions = useRef(new Animated.Value(0)).current;
   const [isOptionsOpen, setOptionsFlag] = useState(false);
-  const [item, setItem] = useState({
+  const [item, setItem] = useState<Omit<ListItem, 'id'>>({
     title: '',
     isDaily: false,
     isDone: false,
     note: '',
+    updated: null
   });
 
   const runPositionAnimation = (targetValue: number) => {
