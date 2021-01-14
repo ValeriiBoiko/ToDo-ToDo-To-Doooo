@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Dimensions, GestureResponderEvent, ScrollView, StatusBar, StyleSheet, Text, TextInput, View } from 'react-native';
 import { batch, connect } from 'react-redux';
-import { Font } from '../constants';
+import { DarkTheme, Font, LightTheme } from '../constants';
 import { ColorTheme, ListItem, RootState } from '../types';
 import { wp, wpdp } from '../utils';
 import Item from '../components/Item';
-import { deleteItemAction, updateItemAction } from '../actions';
+import { deleteItemAction, setColorThemeAction, updateItemAction } from '../actions';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import NewItemInput from '../components/NewItem';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -13,16 +13,19 @@ import Touchable from '../components/Touchable';
 import Animated, { block, call, Clock, cond, Easing, eq, event, interpolate, set, startClock, stopClock, timing, Transition, Transitioning, TransitioningView, Value } from 'react-native-reanimated';
 import ContextMenu from '../components/ContextMenu';
 import { State, TapGestureHandler } from 'react-native-gesture-handler';
+import Toggle from '../components/Toggle';
+import Swipeable from '../components/Swipeable';
 
 interface Props {
   list: ListItem[],
   colors: ColorTheme,
   deleteItem: (item: ListItem) => Function,
   updateItem: (item: ListItem) => Function,
+  setColorTheme: (theme: ColorTheme) => Function,
   [props: string]: any
 };
 
-function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
+function TodoList({ list, colors, deleteItem, updateItem, setColorTheme, ...props }: Props) {
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => getStyles(colors), [colors]);
   const addItemRef = useRef<TextInput>(null);
@@ -70,8 +73,11 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
     })
   };
 
-  const onDeleteItem = (): void => {
-    if (activeItem) {
+  const onDeleteItem = (item: ListItem): void => {
+    if (item) {
+      transitioningRef.current?.animateNextTransition();
+      deleteItem(item);
+    } else if (activeItem) {
       transitioningRef.current?.animateNextTransition();
       deleteItem(activeItem);
     };
@@ -80,17 +86,19 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
   };
 
   const items = sorteredList.map((item) => (
-    <Item
-      {...item}
-      key={item.id}
-      style={{
-        padding: wp(5),
-        borderRadius: wp(8),
-        backgroundColor: activeItem && item.id === activeItem.id ? colors.card : colors.background,
-      }}
-      onPress={() => toggleItem(item)}
-      onLongPress={(event: GestureResponderEvent) => showItemContextMenu(item, event)}
-    />
+    <Swipeable key={item.id} onSwiped={() => onDeleteItem(item)}>
+      <Item
+        {...item}
+
+        style={{
+          padding: wp(5),
+          borderRadius: wp(8),
+          backgroundColor: activeItem && item.id === activeItem.id ? colors.card : colors.background,
+        }}
+        onPress={() => toggleItem(item)}
+        onLongPress={(event: GestureResponderEvent) => showItemContextMenu(item, event)}
+      />
+    </Swipeable>
   ));
 
   useEffect(() => {
@@ -204,9 +212,25 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
 
 
   return (
-    <>
+    <View style={{
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: insets.top || wp(15),
+      paddingBottom: insets.bottom,
+    }}>
+      <View style={styles.themeToggleContainer}>
+        <Toggle
+          isOn={colors.background > '#777'}
+          onToggle={(isOn) => { isOn ? setColorTheme(LightTheme) : setColorTheme(DarkTheme) }}
+          trackColor={colors.card}
+          onThumbColor={colors.border}
+          offThumbColor={colors.border}
+          offIcon={<Icon size={wp(16)} color={colors.primary} name='brightness-1' />}
+          onIcon={<Icon size={wp(16)} color={colors.primary} name='brightness-2' />}
+        />
+      </View>
       <ContextMenu
-        style={{ flex: 1 }}
+        style={{ flex: 1, }}
         {...contextMenu}
         items={[
           {
@@ -224,10 +248,6 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
       >
         <ScrollView style={{ flex: 1 }} contentContainerStyle={[
           styles.container,
-          {
-            paddingTop: insets.top || wp(15),
-            paddingBottom: insets.bottom,
-          }
         ]}>
 
           <Transitioning.View
@@ -274,22 +294,27 @@ function TodoList({ list, colors, deleteItem, updateItem, ...props }: Props) {
             }
           </Transitioning.View>
         </ScrollView>
-
-        <NewItemInput
-          ref={addItemRef}
-          onCancelled={fireTapEvent}
-          onAdded={() => transitioningRef.current?.animateNextTransition()}
-        />
       </ContextMenu>
-    </>
+
+      <NewItemInput
+        ref={addItemRef}
+        onCancelled={fireTapEvent}
+        onAdded={() => transitioningRef.current?.animateNextTransition()}
+      />
+    </View>
   )
 }
 
 const getStyles = (colors: ColorTheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
     paddingHorizontal: wp(15),
+  },
+  themeToggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingRight: wp(15)
   },
   emptyListWrapper: {
     flex: 1,
@@ -332,7 +357,8 @@ const mapStateToProps = (state: RootState) => ({
 
 const mapStateTopRops = (dispatch: Function) => ({
   updateItem: (item: ListItem) => dispatch(updateItemAction(item)),
-  deleteItem: (item: ListItem) => dispatch(deleteItemAction(item))
+  deleteItem: (item: ListItem) => dispatch(deleteItemAction(item)),
+  setColorTheme: (theme: ColorTheme) => dispatch(setColorThemeAction(theme))
 })
 
 export default connect(mapStateToProps, mapStateTopRops)(TodoList);

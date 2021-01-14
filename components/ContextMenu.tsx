@@ -1,4 +1,4 @@
-import React, { Children } from 'react';
+import React, { useState } from 'react';
 import { Dimensions, Platform, Pressable, StyleSheet, Text, View, ViewProps } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Font } from '../constants';
@@ -28,12 +28,13 @@ interface Props extends ViewProps {
 }
 
 function ContextMenu({ isVisible, items, position, onCloseRequest, backgroundColor, textColor, children, ...props }: Props) {
+  const [layout, setLayout] = useState({ x: 0, y: 0 });
   const screen = Dimensions.get('window');
   const left = position.x > screen.width - wp(170) ? screen.width - wp(170) : position.x
   const top = position.y > screen.height - items.length * wp(40) ? screen.height - items.length * wp(40) : position.y
 
   return (
-    <View {...props}>
+    <View {...props} onLayout={({ nativeEvent }) => setLayout(nativeEvent.layout)}>
       {children}
 
       {isVisible ? (
@@ -44,7 +45,7 @@ function ContextMenu({ isVisible, items, position, onCloseRequest, backgroundCol
               position: 'absolute',
               overflow: Platform.OS === 'ios' ? 'visible' : 'hidden',
               left: left,
-              top: top,
+              top: top - layout.y,
               backgroundColor: backgroundColor,
               borderRadius: wp(8),
               shadowColor: "#000",

@@ -1,5 +1,5 @@
 import { Action } from "./constants";
-import { ListItem, TodoItemAction } from "./types";
+import { ColorTheme, ListItem, TodoItemAction } from "./types";
 
 export function deleteItemAction(item: ListItem): TodoItemAction {
   return {
@@ -19,6 +19,13 @@ export function addItemAction(item: ListItem): TodoItemAction {
   return {
     type: Action.ADD_ITEM,
     payload: item,
+  }
+}
+
+export function setColorThemeAction(theme: ColorTheme) {
+  return {
+    type: Action.SET_COLOR_THEME,
+    payload: theme,
   }
 }
 

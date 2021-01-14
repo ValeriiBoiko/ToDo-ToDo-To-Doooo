@@ -4,6 +4,7 @@ export const Action = {
   UPDATE_ITEM: 'UPDATE_ITEM',
   ADD_ITEM: 'ADD_ITEM',
   DELETE_ITEM: 'DELETE_ITEM',
+  SET_COLOR_THEME: 'SET_COLOR_THEME',
 };
 
 export const Font: FontsCollection = {
