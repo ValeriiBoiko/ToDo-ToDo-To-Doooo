@@ -1,12 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, GestureResponderEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useMemo, useRef, useState } from 'react';
+import { GestureResponderEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Font } from '../constants';
 import { ColorTheme, ListItem, RootState } from '../types';
 import { wp } from '../utils';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect } from 'react-redux';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
-import { RectButton } from 'react-native-gesture-handler';
+import { RectButton, State, TapGestureHandler } from 'react-native-gesture-handler';
+import Animated, { and, block, Clock, cond, Easing, eq, event, interpolate, set, startClock, stopClock, timing, Value } from 'react-native-reanimated';
 
 interface Props extends ListItem {
   colors: ColorTheme,
@@ -17,37 +18,71 @@ interface Props extends ListItem {
 
 function Item({ id, title, isDone, note, isDaily, colors, onPress, onDelete, onLongPress, ...props }: Props) {
   const styles = useMemo(() => getStyles(colors), [colors]);
-  const [isOpen, setOpenFlag] = useState(false);
   const [noteMaxHeight, setNoteHeight] = useState(150);
-  const [itemHeight, setItemHeight] = useState(50);
-  const animated = useRef(new Animated.Value(0)).current;
+  const [itemHeight, setItemHeight] = useState(wp(40));
+  const clock = useRef(new Clock()).current;
+  const gestureState = useRef(new Value(-1)).current;
 
-  const runAnimation = (targetValue: number) => {
-    Animated.timing(
-      animated,
-      {
-        duration: 400,
-        toValue: targetValue,
-        easing: Easing.bezier(.43, 0, .55, 1),
-        useNativeDriver: false,
-      }
-    ).start();
-  };
+  const runReAnimation = (clock: Clock, gestureState) => {
+    const state = {
+      finished: new Value(0),
+      position: new Value(0),
+      time: new Value(0),
+      frameTime: new Value(0),
+    };
 
-  useEffect(() => {
-    if (isOpen) {
-      runAnimation(1);
-    } else {
-      runAnimation(0);
+    const config = {
+      duration: 250,
+      toValue: new Value(1),
+      easing: Easing.linear
     }
-  }, [isOpen])
 
-  const containerHeight = animated.interpolate({
+    return block([
+      cond(
+        eq(gestureState, State.BEGAN),
+        [
+          set(state.finished, 0),
+          set(state.time, 0),
+          set(state.frameTime, 0),
+          startClock(clock)
+        ]
+      ),
+      timing(clock, state, config),
+      cond(
+        state.finished,
+        stopClock(clock),
+        cond(
+          and(eq(config.toValue, 1), eq(state.position, 1)),
+          set(config.toValue, 0),
+          cond(
+            and(eq(config.toValue, 0), eq(state.position, 0)),
+            set(config.toValue, 1)
+          )
+        ),
+      ),
+      interpolate(state.position, {
+        inputRange: [0, 1],
+        outputRange: [0, 1]
+      })
+    ])
+  }
+
+  const toggleNote = event([
+    {
+      nativeEvent: {
+        state: gestureState
+      }
+    }
+  ])
+
+
+  const animatedValue = runReAnimation(clock, gestureState);
+  const containerHeight = interpolate(animatedValue, {
     inputRange: [0, 1],
     outputRange: [itemHeight, noteMaxHeight + itemHeight]
   })
 
-  const renderRightActions = (progress: Animated.AnimatedInterpolation, dragX: Animated.AnimatedInterpolation) => {
+  const renderRightActions = (progress: any, dragX: any) => {
     const iconTransition = dragX.interpolate({
       inputRange: [wp(-60), 0],
       outputRange: [0, wp(30)],
@@ -55,11 +90,9 @@ function Item({ id, title, isDone, note, isDaily, colors, onPress, onDelete, onL
 
     return (
       <RectButton style={styles.deleteButton} onPress={() => onDelete(id)}>
-        <Animated.View style={{
-          transform: [{ translateX: iconTransition }]
-        }}>
+        <View>
           <Icon name={'delete-outline'} size={wp(22)} color={colors.background} />
-        </Animated.View>
+        </View>
       </RectButton>
     );
   }
@@ -107,9 +140,13 @@ function Item({ id, title, isDone, note, isDaily, colors, onPress, onDelete, onL
 
             {
               note ? (
-                <Pressable style={{ paddingLeft: wp(20), }} onPress={() => setOpenFlag(!isOpen)}>
-                  <Icon name={'expand-more'} size={wp(32)} color={colors.border} />
-                </Pressable>
+                <Animated.View>
+                  <TapGestureHandler onHandlerStateChange={toggleNote} >
+                    <Animated.View style={{ paddingLeft: wp(20) }}>
+                      <Icon name={'expand-more'} size={wp(32)} color={colors.border} />
+                    </Animated.View>
+                  </TapGestureHandler>
+                </Animated.View>
               ) : null
             }
           </View>
