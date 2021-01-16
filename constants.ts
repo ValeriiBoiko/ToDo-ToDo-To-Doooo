@@ -5,7 +5,7 @@ export const Action = {
   ADD_ITEM: 'ADD_ITEM',
   DELETE_ITEM: 'DELETE_ITEM',
   SET_COLOR_THEME: 'SET_COLOR_THEME',
-};
+} as const;
 
 export const Font: FontsCollection = {
   LIHGT: 'Ubuntu-Light',
@@ -21,6 +21,7 @@ export const LightTheme: ColorTheme = {
   text: '#444',
   invertedText: '#fafafa',
   card: '#e9e9e9',
+  danger: '#ff5252'
 };
 
 export const DarkTheme: ColorTheme = {
@@ -30,4 +31,5 @@ export const DarkTheme: ColorTheme = {
   text: '#fafafa',
   invertedText: '#444',
   card: '#353535',
+  danger: '#ff5252'
 };

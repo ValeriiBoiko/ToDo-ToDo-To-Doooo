@@ -1,18 +1,21 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, GestureResponderEvent, NativeEventEmitter, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, GestureResponderEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Font } from '../constants';
 import { ColorTheme, ListItem, RootState } from '../types';
 import { wp } from '../utils';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect } from 'react-redux';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { RectButton } from 'react-native-gesture-handler';
 
 interface Props extends ListItem {
   colors: ColorTheme,
   onLongPress?: (e: GestureResponderEvent) => void,
+  onDelete: (itemId: number) => void,
   [props: string]: any,
 }
 
-function Item({ id, title, isDone, note, isDaily, colors, onPress, onLongPress, ...props }: Props) {
+function Item({ id, title, isDone, note, isDaily, colors, onPress, onDelete, onLongPress, ...props }: Props) {
   const styles = useMemo(() => getStyles(colors), [colors]);
   const [isOpen, setOpenFlag] = useState(false);
   const [noteMaxHeight, setNoteHeight] = useState(150);
@@ -44,67 +47,90 @@ function Item({ id, title, isDone, note, isDaily, colors, onPress, onLongPress, 
     outputRange: [itemHeight, noteMaxHeight + itemHeight]
   })
 
+  const renderRightActions = (progress: Animated.AnimatedInterpolation, dragX: Animated.AnimatedInterpolation) => {
+    const iconTransition = dragX.interpolate({
+      inputRange: [wp(-60), 0],
+      outputRange: [0, wp(30)],
+    });
+
+    return (
+      <RectButton style={styles.deleteButton} onPress={() => onDelete(id)}>
+        <Animated.View style={{
+          transform: [{ translateX: iconTransition }]
+        }}>
+          <Icon name={'delete-outline'} size={wp(22)} color={colors.background} />
+        </Animated.View>
+      </RectButton>
+    );
+  }
+
   return (
-    <View {...props} style={[
-      styles.container,
-      props.style
-    ]}>
-      <Animated.View
-        style={{
-          height: containerHeight,
-          overflow: 'hidden'
-        }}>
-        <View style={styles.item} onLayout={({ nativeEvent }) => {
-          setItemHeight(nativeEvent.layout.height);
-        }}>
+    <Swipeable containerStyle={styles.underlay} renderRightActions={renderRightActions}>
+      <View {...props} style={[
+        styles.container,
+        props.style
+      ]}>
+        <Animated.View
+          style={{
+            height: containerHeight,
+            overflow: 'hidden'
+          }}>
+          <View style={styles.item} onLayout={({ nativeEvent }) => {
+            setItemHeight(nativeEvent.layout.height);
+          }}>
 
-          <Pressable
-            style={{ flex: 1, ...styles.item }}
-            onLongPress={(e) => { onLongPress && onLongPress(e) }}
-            onPress={onPress}>
-            <View style={[
-              styles.checkbox,
+            <Pressable
+              style={{ flex: 1, ...styles.item }}
+              onLongPress={(e) => { onLongPress && onLongPress(e) }}
+              onPress={onPress}>
+              <View style={[
+                styles.checkbox,
+                {
+                  backgroundColor: isDone ? colors.primary : colors.background,
+                  borderColor: isDone ? colors.primary : colors.border,
+                }
+              ]}>
+                {isDone && <Icon name='done' size={wp(20)} color={colors.invertedText} />}
+              </View>
+
+              <Text style={styles.title}>{title}</Text>
+
               {
-                backgroundColor: isDone ? colors.primary : colors.background,
-                borderColor: isDone ? colors.primary : colors.border,
+                isDaily && (
+                  <View>
+                    <Icon name='date-range' size={wp(22)} color={colors.border} />
+                    <View style={styles.dailyBadge} />
+                  </View>
+                )
               }
-            ]}>
-              {isDone && <Icon name='done' size={wp(20)} color={colors.invertedText} />}
-            </View>
-
-            <Text style={styles.title}>{title}</Text>
+            </Pressable>
 
             {
-              isDaily && (
-                <View>
-                  <Icon name='date-range' size={wp(22)} color={colors.border} />
-                  <View style={styles.dailyBadge} />
-                </View>
-              )
+              note ? (
+                <Pressable style={{ paddingLeft: wp(20), }} onPress={() => setOpenFlag(!isOpen)}>
+                  <Icon name={'expand-more'} size={wp(32)} color={colors.border} />
+                </Pressable>
+              ) : null
             }
-          </Pressable>
+          </View>
 
-          {
-            note ? (
-              <Pressable style={{ paddingLeft: wp(20), }} onPress={() => setOpenFlag(!isOpen)}>
-                <Icon name={'expand-more'} size={wp(32)} color={colors.border} />
-              </Pressable>
-            ) : null
-          }
-        </View>
-
-        <Text
-          onLayout={({ nativeEvent }) => setNoteHeight(nativeEvent.layout.height)}
-          style={[
-            { top: itemHeight },
-            styles.note
-          ]}>{note}</Text>
-      </Animated.View>
-    </View >
+          <Text
+            onLayout={({ nativeEvent }) => setNoteHeight(nativeEvent.layout.height)}
+            style={[
+              { top: itemHeight },
+              styles.note
+            ]}>{note}</Text>
+        </Animated.View>
+      </View >
+    </Swipeable>
   )
 }
 
 const getStyles = (colors: ColorTheme) => StyleSheet.create({
+  underlay: {
+    backgroundColor: '#ff5252',
+    borderRadius: wp(8),
+  },
   container: {
     overflow: 'hidden',
     backgroundColor: colors.background
@@ -137,6 +163,11 @@ const getStyles = (colors: ColorTheme) => StyleSheet.create({
     height: wp(8),
     borderRadius: wp(8),
     backgroundColor: colors.primary
+  },
+  deleteButton: {
+    width: wp(60),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   note: {
     position: 'absolute',

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Dimensions, GestureResponderEvent, ScrollView, StatusBar, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Dimensions, GestureResponderEvent, RefreshControlBase, ScrollView, StatusBar, StyleSheet, Text, TextInput, View } from 'react-native';
 import { batch, connect } from 'react-redux';
 import { DarkTheme, Font, LightTheme } from '../constants';
 import { ColorTheme, ListItem, RootState } from '../types';
@@ -14,12 +14,11 @@ import Animated, { block, call, Clock, cond, Easing, eq, event, interpolate, set
 import ContextMenu from '../components/ContextMenu';
 import { State, TapGestureHandler } from 'react-native-gesture-handler';
 import Toggle from '../components/Toggle';
-import Swipeable from '../components/Swipeable';
 
 interface Props {
   list: ListItem[],
   colors: ColorTheme,
-  deleteItem: (item: ListItem) => Function,
+  deleteItem: (itemId: number) => Function,
   updateItem: (item: ListItem) => Function,
   setColorTheme: (theme: ColorTheme) => Function,
   [props: string]: any
@@ -30,7 +29,7 @@ function TodoList({ list, colors, deleteItem, updateItem, setColorTheme, ...prop
   const styles = useMemo(() => getStyles(colors), [colors]);
   const addItemRef = useRef<TextInput>(null);
   const sorteredList = list.concat([]).sort((cur, next) => cur.isDone ? 1 : -1);;
-  const [activeItem, setActiveItem] = useState<ListItem | null>(null);
+  const [activeItem, setActiveItem] = useState<number>(-1);
   const transitioningRef = useRef<TransitioningView>(null);
   const [contextMenu, setContextMenu] = useState({
     isVisible: false,
@@ -55,7 +54,7 @@ function TodoList({ list, colors, deleteItem, updateItem, setColorTheme, ...prop
   };
 
   const showItemContextMenu = (item: ListItem, { nativeEvent }: GestureResponderEvent): void => {
-    setActiveItem(item);
+    setActiveItem(item.id);
     setContextMenu({
       isVisible: true,
       position: {
@@ -66,39 +65,34 @@ function TodoList({ list, colors, deleteItem, updateItem, setColorTheme, ...prop
   };
 
   const onCloseMenuRequest = (): void => {
-    setActiveItem(null);
+    setActiveItem(-1);
     setContextMenu({
       ...contextMenu,
       isVisible: false,
     })
   };
 
-  const onDeleteItem = (item: ListItem): void => {
-    if (item) {
-      transitioningRef.current?.animateNextTransition();
-      deleteItem(item);
-    } else if (activeItem) {
-      transitioningRef.current?.animateNextTransition();
-      deleteItem(activeItem);
-    };
+  const onDeleteItem = (itemId: number): void => {
+    transitioningRef.current?.animateNextTransition();
+    deleteItem(itemId);
 
     setTimeout(onCloseMenuRequest, 150)
   };
 
   const items = sorteredList.map((item) => (
-    <Swipeable key={item.id} onSwiped={() => onDeleteItem(item)}>
-      <Item
-        {...item}
+    <Item
+      key={item.id}
+      {...item}
 
-        style={{
-          padding: wp(5),
-          borderRadius: wp(8),
-          backgroundColor: activeItem && item.id === activeItem.id ? colors.card : colors.background,
-        }}
-        onPress={() => toggleItem(item)}
-        onLongPress={(event: GestureResponderEvent) => showItemContextMenu(item, event)}
-      />
-    </Swipeable>
+      style={{
+        padding: wp(5),
+        borderRadius: wp(8),
+        backgroundColor: item.id === activeItem ? colors.card : colors.background,
+      }}
+      onPress={() => toggleItem(item)}
+      onDelete={onDeleteItem}
+      onLongPress={(event: GestureResponderEvent) => showItemContextMenu(item, event)}
+    />
   ));
 
   useEffect(() => {
@@ -235,7 +229,7 @@ function TodoList({ list, colors, deleteItem, updateItem, setColorTheme, ...prop
         items={[
           {
             label: 'Delete',
-            onPress: onDeleteItem,
+            onPress: () => onDeleteItem(activeItem),
             icon: {
               color: '#ff5252',
               name: 'delete-outline'
@@ -357,7 +351,7 @@ const mapStateToProps = (state: RootState) => ({
 
 const mapStateTopRops = (dispatch: Function) => ({
   updateItem: (item: ListItem) => dispatch(updateItemAction(item)),
-  deleteItem: (item: ListItem) => dispatch(deleteItemAction(item)),
+  deleteItem: (itemId: number) => dispatch(deleteItemAction(itemId)),
   setColorTheme: (theme: ColorTheme) => dispatch(setColorThemeAction(theme))
 })
 

@@ -1,3 +1,5 @@
+import { Action } from "./constants";
+
 export interface ListItem {
   id: number,
   title: string,
@@ -19,6 +21,7 @@ export interface ColorTheme {
   text: string,
   invertedText: string,
   card: string,
+  danger: string
 }
 
 export interface FontsCollection {
@@ -29,6 +32,16 @@ export interface FontsCollection {
 }
 
 export interface TodoItemAction {
-  type: string,
+  type: typeof Action.ADD_ITEM | typeof Action.UPDATE_ITEM,
   payload: ListItem
+}
+
+export interface DeleteTodoItemAction {
+  type: typeof Action.DELETE_ITEM,
+  payload: number
+}
+
+export interface ColorThemeAction {
+  type: typeof Action.SET_COLOR_THEME,
+  payload: ColorTheme
 }

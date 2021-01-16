@@ -11,7 +11,7 @@ interface ContextMenuItem {
     name: string
   },
   label: string,
-  onPress: () => void,
+  onPress: (e?: any) => void,
 }
 
 interface Props extends ViewProps {

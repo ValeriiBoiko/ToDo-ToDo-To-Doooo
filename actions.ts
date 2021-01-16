@@ -1,10 +1,10 @@
 import { Action } from "./constants";
-import { ColorTheme, ListItem, TodoItemAction } from "./types";
+import { ColorTheme, DeleteTodoItemAction, ListItem, TodoItemAction } from "./types";
 
-export function deleteItemAction(item: ListItem): TodoItemAction {
+export function deleteItemAction(itemId: number): DeleteTodoItemAction {
   return {
     type: Action.DELETE_ITEM,
-    payload: item,
+    payload: itemId,
   }
 }
 
@@ -37,19 +37,6 @@ export function addItem(item: Omit<ListItem, 'id'>) {
       addItemAction({
         ...item,
         id: list.length ? list[list.length - 1].id + 1 : 0,
-      })
-    )
-  }
-}
-
-export function removeItem(itemId: number) {
-  return (dispatch: Function, getState: Function): void => {
-    const list: ListItem[] = getState().list;
-
-    dispatch(
-      addItemAction({
-        ...item,
-        id: list[list.length - 1].id + 1,
       })
     )
   }
