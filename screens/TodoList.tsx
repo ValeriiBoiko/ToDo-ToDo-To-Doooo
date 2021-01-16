@@ -308,7 +308,8 @@ const getStyles = (colors: ColorTheme) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    paddingRight: wp(15)
+    paddingRight: wp(15),
+    paddingVertical: wp(5),
   },
   emptyListWrapper: {
     flex: 1,
