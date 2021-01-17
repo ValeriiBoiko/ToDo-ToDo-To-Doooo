@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { GestureResponderEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import { GestureResponderEvent, Pressable, StyleSheet, Text, View, Animated as RNAnimated } from 'react-native';
 import { Font } from '../constants';
 import { ColorTheme, ListItem, RootState } from '../types';
 import { wp } from '../utils';
@@ -90,9 +90,11 @@ function Item({ id, title, isDone, note, isDaily, colors, onPress, onDelete, onL
 
     return (
       <RectButton style={styles.deleteButton} onPress={() => onDelete(id)}>
-        <View>
+        <RNAnimated.View style={{
+          transform: [{ translateX: iconTransition }]
+        }}>
           <Icon name={'delete-outline'} size={wp(22)} color={colors.background} />
-        </View>
+        </RNAnimated.View>
       </RectButton>
     );
   }
